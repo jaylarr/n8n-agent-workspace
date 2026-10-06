@@ -38,7 +38,7 @@ saved JSON and label live layout as unverified. Do not invent REST `setNodePosit
    straddling two notes, is a defect. *Why:* the notes are the map, and a node outside them is invisible to
    the reader.
 2. **Main sections are numbered in execution order and follow one layout**: Row (left → right,
-   same `y` and `height`) or Column (top → bottom, same `x` and `width`), see
+   same `y`) or Column (top → bottom, same `x` and `width`), see
    [Layouts](#layouts-row-or-column). Never mix the two in one workflow. Title format is `## NN — VERB + VERB`: two digits, an em dash (`—`),
    UPPERCASE, 1–3 short words per side, joined with `+` (`01 — INTAKE + CHECK`,
    `03 — COMPANY WIKI`, `05 — SAVE + RESPOND`). *Why:* the numbers give the reading order at a
@@ -106,13 +106,38 @@ State the chosen layout in the section outline (Procedure step 1), e.g. *"Layout
 
 **Column geometry:**
 - All main sections share `x` and `width` (the widest section's content + ~120 px). Each section's
-  `height` fits its own content (header ~240 px + node rows), so heights may differ.
+  `height` fits its own rendered text and complete node bounds, so heights may differ.
 - Vertical gap between sections: 48 px. Section N+1 starts at `y = yN + heightN + 48`.
 - Side column on the right at `x = mainX + mainWidth + 48`: SETUP at the top, then EXCEPTIONS
   (top-aligned with the first section that branches into it), then DEMO BOUNDARY. Same 48 px gaps.
 - n8n's auto-layout always spreads nodes left → right, so **a Column layout needs repositioning
   after every create/update**: `setNodePosition` for every node and sticky, plus `/width` and
   `/height` on each sticky (max 100 operations per `update_workflow`, so batch big workflows).
+
+## Compact note sizing
+
+Size notes from their content. For a sizing-only edit, preserve the owner-approved arrangement,
+node and note positions, note widths, wording and colors; do not reflow an existing canvas to the
+Row/Column defaults.
+
+- Include the full node body, names, subtitles, output labels and attached sub-nodes when measuring
+  bounds. Tall Switch nodes and wrapped names need more room than a standard node icon.
+  Exclude transient hover toolbars and execution buttons from the persistent node bounds.
+- Leave **40 px below the lowest rendered node or text**, then round the height up to an 8 px
+  grid: `height = ceil((lowestBottom - stickyY + 40) / 8) * 8`.
+  `lowestBottom` is the maximum bottom edge of the rendered text and all persistent node bounds
+  in that section; for a text-only note, use the text bottom alone. All bottoms use canvas
+  coordinates, independent of browser zoom. Rounding leaves 40 to less than 48 px of bottom
+  space. Do not add a header allowance a second time when nodes already have absolute positions.
+- Header clearance depends on rendered text at the actual note width. Keep that text above the
+  first node row without reserving an arbitrary extra band below the last row.
+- Text-only SETUP / DEMO notes fit their rendered Markdown plus padding; they do not inherit
+  the main section height. Do not shorten useful copy merely to fit a smaller note.
+- Row sections align at the top and may have different heights. Equal heights are optional when
+  the owner requests them; do not enlarge short sections to match the tallest section by default.
+- Local JSON can use a conservative footprint estimate (about 180 px for ordinary labeled nodes),
+  but that is provisional. Recheck tall nodes, wrapping, content clipping and bottom padding in the
+  real n8n canvas before reporting visual verification. Saved coordinates alone cannot prove this.
 
 ## Section body vocabulary
 
@@ -152,10 +177,11 @@ short sentences. Use a trailing double space + `\n` for line breaks.
 5. **Create/update** only within authorization, then **verify the layout** with API read-back or
    MCP `get_workflow_details` (saved JSON only when offline). For every
    `n8n-nodes-base.stickyNote` take `position` [x, y] + `parameters.width/height`, then check:
-   - every non-sticky node's `position` falls inside exactly one section rectangle
-     (x between `sx` and `sx + width − 100`, y between `sy + 180` and `sy + height − 100`, so it
-     doesn't cover the heading text);
-   - **Row:** main sections share one `y` and `height`, don't overlap, and increase in `x` in
+   - every non-sticky node's complete rendered bounds, including labels and sub-nodes, fall inside
+     exactly one section rectangle, below the rendered heading/body text; an anchor-point check
+     alone is insufficient. In the browser, confirm readable text, no clipping and 40 to less than
+     48 canvas px of bottom space after grid rounding;
+   - **Row:** main sections share one `y`, fit their own content, don't overlap, and increase in `x` in
      numeric order (gap ~16–48 px);
    - **Column:** main sections share one `x` and `width`, don't overlap, and increase in `y` in
      numeric order (gap ~48 px), and nodes inside each section run left → right;
@@ -163,10 +189,12 @@ short sentences. Use a trailing double space + `\n` for line breaks.
 6. **Fix any misfit** in the JSON/payload and re-read it. In MCP mode use `update_workflow`: `setNodePosition` for nodes and stickies, and
    `setNodeParameter` (`/width`, `/height`) for sticky size. Then call `get_workflow_details` again
    to confirm, because auto-layout can move things. Geometry cheat-sheet (matches the reference workflows):
-   - sticky header block ≈ 200–260 px tall, so place node rows at `sy + 240` … `sy + height − 120`;
+   - place the first node row below the rendered header text; an existing `sy + 240` row may stay
+     when only resizing, but header clearance is not a fixed minimum height;
    - ~220–260 px horizontal spacing between nodes, ~130–160 px between branch rows;
-   - section `height` 430–560 (720 if it holds three branch rows), `width` = content + ~120 px;
-   - Row: EXCEPTIONS row at `y = mainY + mainHeight + 48`; SETUP either above the main row
+   - section `height` follows the compact sizing formula above; `width` fits
+     complete node bounds plus side padding. Reference sizes are examples, not minimums;
+   - Row: EXCEPTIONS row at `y = max(main section bottoms) + 48`; SETUP either above the main row
      (`y = mainY − setupHeight − 24`) or in the lower row next to DEMO BOUNDARY;
    - Column: see "Column geometry" in [Layouts](#layouts-row-or-column).
 7. **Keep sections current on every later edit.** When a node is added, removed, or changes
@@ -186,6 +214,7 @@ short sentences. Use a trailing double space + `\n` for line breaks.
 | A 6-section Row that's 6,000 px wide | You have to scroll sideways to read it | Column layout |
 | Row and Column mixed in one workflow | No reading order | One layout per workflow |
 | Column layout left to auto-layout | Nodes end up in one long line, outside their bands | Reposition every node after create/update (Column geometry) |
+| Large blank area below the last node | Fixed/template height or header counted twice | Fit rendered bounds plus 40 px, rounded up to 8 px; size text-only notes separately |
 | One giant section / ten tiny ones | No story | 3–6 sections; split a long workflow into sub-workflows |
 | Random colors, or red used to mean "warning" on a section | Mixed signals | The palette table above; warnings get a small `### ⚠` callout |
 | Unnumbered or lowercase titles, `-` instead of `—` | Inconsistent across projects | `## NN — VERB + VERB` |

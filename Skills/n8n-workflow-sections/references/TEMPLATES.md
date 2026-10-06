@@ -16,11 +16,16 @@ Sticky nodes use the same saved workflow JSON as the canvas. For example:
   "parameters": {
     "content": "## 01 — RECEIVE + CHECK\n\n**What happens here:**\nThe request is checked before processing.",
     "width": 720,
-    "height": 500,
+    "height": 424,
     "color": 5
   }
 }
 ```
+
+This illustrative height assumes the full rendered node bottom is y = 384 (a row at y = 240
+with a measured 144 px footprint) and the text ends above it:
+`ceil((384 - 0 + 40) / 8) * 8 = 424`. Recompute from the actual rendered nodes and text;
+neither this height nor this node footprint is a minimum or a universal node size.
 
 Place working nodes inside the section rectangle; retain their existing IDs and connections.
 Use the installed version's accepted workflow write schema rather than posting the entire GET
@@ -143,26 +148,34 @@ export default workflow('id', '[project-slug] Record completed milestone')
 
 Check the exact `sticky` config keys (e.g. `width`, `height`, `position`) in the live
 `get_workflow_sdk_reference` before relying on them, because the SDK changes. If auto-sizing leaves
-nodes outside their notes, fix it after creation with `setNodePosition` + `setNodeParameter`
+nodes outside their notes or excess empty space below them, fit complete rendered bounds after
+creation with `setNodePosition` + `setNodeParameter`
 (`/width`, `/height`) and re-check (SKILL.md steps 5–6).
 
 ## Column layout: worked coordinates
 
 Five sections, positions set with `setNodePosition` after the create (auto-layout ignores them).
 Main column at `x = 0`, `width = 1400`. Nodes ~240 px apart, the first node row at `sy + 260`.
+For this illustration only, each node has a measured 144 px full footprint and the section text
+ends above the nodes. One row therefore needs `ceil((260 + 144 + 40) / 8) * 8 = 448` px;
+two rows, 160 px apart, need `ceil((420 + 144 + 40) / 8) * 8 = 608` px.
+The SETUP and DEMO text-only examples assume measured text bottoms 280 px and 360 px below
+their note tops, respectively; their heights are 320 px and 400 px.
 
 | Sticky | position [x, y] | width × height | Node rows inside |
 |---|---|---|---|
-| `01 — REQUEST RECEIVED` (5) | [0, 0] | 1400 × 440 | y = 260, x = 64, 304, 544 … |
-| `02 — CHECK + PROTECT` (6) | [0, 488] | 1400 × 440 | y = 748 |
-| `03 — UNDERSTAND THE REQUEST` (4) | [0, 976] | 1400 × 600 | y = 1236 (main), 1396 (branch) |
-| `04 — SAFETY + GUIDANCE` (3) | [0, 1624] | 1400 × 600 | y = 1884, 2044 |
-| `05 — SAVE + RESPOND` (5) | [0, 2272] | 1400 × 600 | y = 2532, 2692 |
-| `SETUP BEFORE GO-LIVE` (1) | [1448, 0] | 700 × 440 | — |
-| `EXCEPTIONS` (2) | [1448, 488] | 700 × 600 | exception endings, y = 748 … |
-| `DEMO BOUNDARY` (7) | [1448, 1136] | 700 × 440 | — |
+| `01 — REQUEST RECEIVED` (5) | [0, 0] | 1400 × 448 | y = 260, x = 64, 304, 544 … |
+| `02 — CHECK + PROTECT` (6) | [0, 496] | 1400 × 448 | y = 756 |
+| `03 — UNDERSTAND THE REQUEST` (4) | [0, 992] | 1400 × 608 | y = 1252 (main), 1412 (branch) |
+| `04 — SAFETY + GUIDANCE` (3) | [0, 1648] | 1400 × 608 | y = 1908, 2068 |
+| `05 — SAVE + RESPOND` (5) | [0, 2304] | 1400 × 608 | y = 2564, 2724 |
+| `SETUP BEFORE GO-LIVE` (1) | [1448, 0] | 700 × 320 | — |
+| `EXCEPTIONS` (2) | [1448, 496] | 700 × 448 | exception endings, y = 756 |
+| `DEMO BOUNDARY` (7) | [1448, 992] | 700 × 400 | — |
 
-Each section's y = previous y + previous height + 48.
+For a new Column, each section's y = previous y + previous height + 48. These coordinates are
+illustrative; recompute every height from rendered content, especially text-only notes. A sizing-only
+edit preserves existing positions.
 
 ## Reference workflows (the house style)
 
@@ -176,6 +189,7 @@ Three workflows chosen as the standard (2026-09-27):
 
 The palette in SKILL.md standardizes the colors of the first example for all future workflows.
 
-Measured geometry: the main row shares `y` and `height` (430 / 456 / 520). Widths run 600–1290.
+Historical reference geometry: the main row shares `y` and `height` (430 / 456 / 520). These are
+examples, not minimums or a requirement for equal heights. Widths run 600–1290.
 Gaps between sections are 16–48 px. Nodes sit ~240–280 px below the note's top edge. The lower row
 starts ~48 px below the main row.

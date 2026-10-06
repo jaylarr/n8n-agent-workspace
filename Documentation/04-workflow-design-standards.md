@@ -104,6 +104,14 @@ Skill: `n8n-workflow-lifecycle-official`
   | SETUP BEFORE GO-LIVE | 1 yellow (default) |
   | DEMO BOUNDARY | 7 gray |
   | Warning callout inside a section (`### ⚠ …`) | 3 red, small |
+- **Fit sticky sizes to rendered content.** Include node bodies, names, subtitles, output labels
+  and attached sub-nodes. Use `height = ceil((lowestBottom - stickyY + 40) / 8) * 8`, where
+  `lowestBottom` is the lowest rendered node or text edge in canvas coordinates. Count header
+  clearance once. Row sections align at the top with independent heights; new Column sections
+  stack using their calculated heights plus a 48 px gap. Text-only notes fit their own Markdown.
+  Preserve approved positions, widths, wording and colors during sizing-only edits. Verify readable
+  text, full containment and 40 to less than 48 canvas px of bottom space in the n8n browser canvas;
+  template dimensions and offline estimates are provisional, not minimum sizes or visual proof.
 - **Node groups** are optional (only when the owner asks). The sticky sections are the house standard,
   and they override the official skill's "stickies annotate, don't group" guidance.
 - **Node notes** on any non-obvious configuration or workaround.
