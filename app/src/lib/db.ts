@@ -161,10 +161,13 @@ const MIGRATIONS: string[] = [
 function open(): Database.Database {
   fs.mkdirSync(path.dirname(DATABASE_PATH), { recursive: true })
   const db = new Database(DATABASE_PATH)
-  db.pragma('journal_mode = WAL')
+  db.pragma('busy_timeout = 3000')
+  try { db.pragma('journal_mode = WAL') }
+  catch (error) {
+    if (!String((error as { code?: string })?.code || '').startsWith('SQLITE_BUSY')) throw error
+  }
   db.pragma('synchronous = NORMAL')
   db.pragma('foreign_keys = ON')
-  db.pragma('busy_timeout = 3000')
 
   // Read the schema version and migrate under one write lock (BEGIN IMMEDIATE). Several processes can
   // open a brand-new database at once (the build runs parallel workers); without the lock two of them
