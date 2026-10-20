@@ -14,6 +14,15 @@ cloud database.
 | **Docs & skills** | `AGENTS.md`, `Documentation/`, templates, and every skill, rendered with search |
 | **Settings** | **n8n instances** (add/edit/test/sync/remove any number of n8n servers; keys go to `.env.local` as `N8N_API_KEY__<ID>`), auto-sync interval, log retention, event-inbox token, **Backups** (scheduled auto-export, optional auto-commit), **Recently deleted** projects (restore within 30 days), app maintenance, DB info |
 
+## Download a workflow
+
+**Download to your device:** open the workflow's **Settings** button in **Workflows** or an opened
+project, choose **Download JSON**, and confirm the download. This fetches the current definition from n8n and downloads an importable JSON file through
+your browser, without changing n8n or the project's saved backup. Project downloads use the verified
+source installation binding; unlinked uploads must be linked first, or downloaded from Workflows.
+Pinned data and runtime state are removed, and detected hardcoded secrets block the download.
+**Import / Update** saves a project backup; **Restore to n8n** sends a saved backup back to n8n.
+
 ## Existing workflow audits
 
 **Project visuals:** optional `assets/diagrams/overview.json` files supply a dedicated, expandable **How it works** section inside opened projects of both types. The Projects list cards contain no visuals. Agents update validated project data using the shared CLI; refresh the page to see changes without rebuilding. Visuals distinguish planned/saved-source/documented test evidence and report changed sources, without claiming current live behavior. See [Project visuals](../Documentation/project-visuals.md). Existing upload/commit protections and audit report image restrictions remain in place.

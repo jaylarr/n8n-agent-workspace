@@ -91,7 +91,7 @@ an undo button. **It is not a replacement for git.** It lives and dies with the 
 
 ## Importing a workflow (deploy or restore)
 
-**Easiest:** the **Restore to n8n** button on the workflow's row in the Control Center project page
+**Easiest:** open the workflow row's **Settings** on the Control Center project page, then use **Restore to n8n**
 (creates an unpublished workflow, or updates an existing target; a published target can remain live
 and requires explicit confirmation). Use its reference setup and preview. Then do steps 2–5 below. By hand:
 

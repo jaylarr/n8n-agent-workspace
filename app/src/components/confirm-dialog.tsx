@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
 import { useScrollLock } from './use-modal'
 
 /** Accessible confirmation modal built on the native <dialog> (focus trap, Esc to cancel). */
@@ -22,6 +22,7 @@ export function ConfirmDialog({
   onCancel: () => void
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  const titleId = useId()
   useScrollLock(open)
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export function ConfirmDialog({
     <dialog
       ref={ref}
       className="dialog"
-      aria-labelledby="confirm-title"
+      aria-labelledby={titleId}
       onCancel={(e) => {
         e.preventDefault()
         onCancel()
@@ -45,7 +46,7 @@ export function ConfirmDialog({
       }}
     >
       <div className="dialog-body">
-        <h2 id="confirm-title" className="card-title">
+        <h2 id={titleId} className="card-title">
           {title}
         </h2>
         <div className="small muted stack-sm">{children}</div>

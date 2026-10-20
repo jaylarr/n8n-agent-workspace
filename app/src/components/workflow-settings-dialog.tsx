@@ -8,6 +8,7 @@ import { relativeTime } from '@/lib/format'
 import { PublishDialog } from './publish-dialog'
 import { useBackdropClose, useScrollLock } from './use-modal'
 import { CaptureEditor } from './capture-editor'
+import { WorkflowDownload } from './workflow-download'
 import { type CaptureSpec, MAX_VALUE_CHARS } from '@/lib/capture'
 
 // Mirrors LOG_MODES in lib/workflow-prefs (that module is server-only: it opens the database).
@@ -119,6 +120,7 @@ export function WorkflowSettingsDialog({
       className="dialog modal"
       aria-labelledby="wfs-title"
       onCancel={(e) => {
+        if (e.target !== e.currentTarget) return
         e.preventDefault()
         if (!pending) onClose()
       }}
@@ -150,6 +152,9 @@ export function WorkflowSettingsDialog({
         </header>
 
         <div className="modal-scroll">
+          <Section icon={Server} title="Export workflow" description="Save the current workflow from n8n to your device as a JSON file.">
+            <WorkflowDownload query={new URLSearchParams({ instance: workflow.instanceId, workflow: workflow.id }).toString()} name={workflow.name} />
+          </Section>
           <Section icon={StickyNote} title="Notes" description="Shown next to this workflow’s alerts, so the fix is right there. Don’t paste passwords or keys.">
             <div className="field">
               <label htmlFor="wfs-notes" className="sr-only">
