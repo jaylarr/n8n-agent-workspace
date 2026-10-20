@@ -18,7 +18,7 @@ import { listTestRuns } from '@/lib/test-results'
 import { STATUSES, getProject, projectRepoStatus, readProjectDoc } from '@/lib/projects'
 import { backupSummary } from '@/lib/git'
 import { BackupCard } from '@/components/backup-card'
-import { RestoreButton } from '@/components/restore-button'
+import { ProjectWorkflowSettings } from '@/components/project-workflow-settings'
 import { connectedInstances } from '@/lib/instances'
 import { AuditProjectPage } from '@/components/audit-project'
 import { businessContextAgentInstruction } from '@/lib/business-context'
@@ -116,7 +116,7 @@ export default async function ProjectPage(props: PageProps<'/projects/[slug]'>) 
                       <th>Trigger</th>
                       <th className="num">Nodes</th>
                       <th>Credentials</th>
-                      <th aria-label="Restore to n8n" />
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -138,7 +138,7 @@ export default async function ProjectPage(props: PageProps<'/projects/[slug]'>) 
                         <td className="small">{w.triggers.join(', ') || '—'}</td>
                         <td className="num">{w.nodeCount}</td>
                         <td className="small muted">{w.credentials.join(', ') || '—'}</td>
-                        <td>{!w.parseError && <RestoreButton slug={slug} file={w.file} instances={instances} />}</td>
+                        <td>{!w.parseError && <ProjectWorkflowSettings slug={slug} file={w.file} name={w.name} instances={instances} linked />}</td>
                       </tr>
                     ))}
                   </tbody>
