@@ -120,6 +120,7 @@ export function WorkflowSettingsDialog({
       className="dialog modal"
       aria-labelledby="wfs-title"
       onCancel={(e) => {
+        if (e.target !== e.currentTarget) return
         e.preventDefault()
         if (!pending) onClose()
       }}

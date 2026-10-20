@@ -30,7 +30,7 @@ function Settings({ name, onClose, children }: { name: string; onClose: () => vo
   useScrollLock()
   const backdrop = useBackdropClose(ref, onClose)
   useEffect(() => { ref.current?.showModal() }, [])
-  return <dialog ref={ref} className="dialog modal" aria-labelledby="project-workflow-settings-title" onCancel={e => { e.preventDefault(); onClose() }} {...backdrop}>
+  return <dialog ref={ref} className="dialog modal" aria-labelledby="project-workflow-settings-title" onCancel={e => { if (e.target !== e.currentTarget) return; e.preventDefault(); onClose() }} {...backdrop}>
     <button type="button" className="modal-close" onClick={onClose} aria-label="Close settings"><X aria-hidden /></button>
     <div className="modal-frame">
       <header className="modal-head"><div className="eyebrow">Workflow settings</div><h2 id="project-workflow-settings-title" className="modal-title">{name}</h2></header>
